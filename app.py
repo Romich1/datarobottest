@@ -2,13 +2,14 @@
 import requests
 from flask import Flask, session, request
 
-app = Flask('flask_name')
 callbackurl = 'http://datarobottest.herokuapp.com/callback'
 redirecturl = 'http://datarobottest.herokuapp.com/redirect'
 gitapi = 'https://api.github.com'
+app = Flask('flask_name')
 
 @app.route('/')
-def root():
+@app.route('/index')
+def index():
     return('It works!!')
 
 @app.route('/auth')
