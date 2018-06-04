@@ -37,4 +37,5 @@ def authorize():
     r = requests.get(github_url)
     return r
 
-app.run()
+if __name__ == '__main__':
+    app.run()
