@@ -1,0 +1,4 @@
+json
+flask
+oauth2
+requests
