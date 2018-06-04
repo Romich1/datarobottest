@@ -10,7 +10,7 @@ gitapi = 'https://api.github.com'
 
 @app.route('/')
 def root():
-    return('It works!')
+    return('It works!!')
 
 @app.route('/auth')
 def request_authorization():
@@ -29,7 +29,6 @@ def callback():
 @app.route('/redirect')
 def redirect():
     return('Redirect triggered \n %s' % request.headers)
-
 
 def authorize():
     github_url = 'https://github.com/login/oauth/authorize'
