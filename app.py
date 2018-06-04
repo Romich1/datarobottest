@@ -26,6 +26,10 @@ def handle_responce():
 def callback():
     return('callback triggered \n %s' % request.headers)
 
+@app.route('/session')
+def session():
+    return('session triggered \n %s' % request.headers)
+
 @app.route('/redirect')
 def redirect():
     return('Redirect triggered \n %s' % request.headers)
