@@ -32,7 +32,7 @@ def redirect():
 
 def authorize():
     github_url = 'https://github.com/login/oauth/authorize'
-    parameters = {'client_id': 'f7d95f0c925ee3c42ed9 ', 'url': redirecturl}
+    parameters = {'client_id': 'f7d95f0c925ee3c42ed9', 'url': redirecturl}
     r = requests.get(github_url, params = parameters)
     return r
 
