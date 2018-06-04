@@ -16,7 +16,7 @@ def index():
 def request_authorization():
     print('request_authorization')
     r = authorize()
-    return(r)
+    return(r.text)
 
 @app.route('/response')
 def handle_responce():
