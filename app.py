@@ -3,8 +3,8 @@ import requests
 from flask import Flask, session, request
 
 app = Flask('flask_name')
-callbackurl = 'http://murmuring-tundra-47748.herokuapp.com/callback'
-redirecturl = 'http://murmuring-tundra-47748.herokuapp.com/redirect'
+callbackurl = 'http://datarobottest.herokuapp.com/callback'
+redirecturl = 'http://datarobottest.herokuapp.com/redirect'
 gitapi = 'https://api.github.com'
 
 @app.route('/')
