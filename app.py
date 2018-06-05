@@ -28,10 +28,14 @@ def redirect_auth():
     responce_code = request.values.get('code')
     token_responce = token_request(responce_code)
     try:
-        user_token = token_responce.json('access_token')
-    except:
-        user_token = ''
-    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br /> l %s t %s ' % (token_responce.headers,len(user_token),token_responce.text))
+        user_token = token_responce.json().get('access_token')
+    except ValueError:
+        user_token = None
+
+    if user_token is None:
+        return('Token recieving error <br /> Headers <br />  %s <br /> Responce text <br /> %s ' % (token_responce.headers,jsonify(token_responce.text)))
+    else:
+        return users_repos(user_token)
 
 
 def token_request(token_code):
@@ -41,6 +45,11 @@ def token_request(token_code):
     response = requests.post(token_url, params=parameters, headers=headers)
     return response
 
+def users_repos(token):
+    url = 'https://api.github.com/user/repos'
+    headers = {'Accept': 'application/json','Authorization':'Bearer %s' %token}
+    response = requests.post(url, headers=headers)
+    return jsonify(response.text)
 
 if __name__ == '__main__':
     app.run()
