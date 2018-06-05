@@ -1,6 +1,5 @@
-#import oauth2
 import requests
-from flask import Flask, session, request
+from flask import Flask, request
 import os
 
 callbackurl = 'http://datarobottest.herokuapp.com/callback'
