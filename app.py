@@ -1,5 +1,6 @@
+import json
+from flask import Flask, redirect, request, jsonify
 import requests
-from flask import Flask, redirect, request
 import os
 
 github_auth_url = 'https://github.com/login/oauth/authorize'
@@ -26,12 +27,14 @@ def request_authorization():
 def redirect_auth():
     responce_code = request.values.get('code')
     user_token_r = token_request(responce_code)
-    return('Redirect auth triggered <br />  %s ' % user_token_r.headers)
+    #response_json = json.dumps(user_token_r.text, sort_keys=True, indent=4, separators=(',', ': '))
+    #return ('Redirect auth triggered <br /> <br />  <div class="results"> <pre> {{%s | safe}}</pre> </div> ' % response_json)
+    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br />  %s ' % (user_token_r.headers,user_token_r.text))
 
 
 def token_request(token_code):
     token_url = 'https://github.com/login/oauth/access_token'
-    parameters = {'client_id': client_id, 'client_secret': client_secret, 'code': token_code}
+    parameters = {'client_id': client_id, 'client_secret': client_secret, 'code': token_code, 'Accept': 'application/json'}
     r = requests.post(token_url, params=parameters)
     return r
 
