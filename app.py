@@ -26,17 +26,20 @@ def request_authorization():
 @app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
     responce_code = request.values.get('code')
-    user_token_r = token_request(responce_code)
-    #response_json = json.dumps(user_token_r.text, sort_keys=True, indent=4, separators=(',', ': '))
-    #return ('Redirect auth triggered <br /> <br />  <div class="results"> <pre> {{%s | safe}}</pre> </div> ' % response_json)
-    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br />  %s ' % (user_token_r.headers,user_token_r.text))
+    token_responce = token_request(responce_code)
+    try:
+        user_token = token_responce.json('access_token')
+    except:
+        user_token = ''
+    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br />  %s ' % (token_responce.headers,len(user_token)))
 
 
 def token_request(token_code):
     token_url = 'https://github.com/login/oauth/access_token'
-    parameters = {'client_id': client_id, 'client_secret': client_secret, 'code': token_code, 'Accept': 'application/json'}
-    r = requests.post(token_url, params=parameters)
-    return r
+    parameters = {'client_id': client_id, 'client_secret': client_secret, 'code': token_code}
+    headers = {'Accept': 'application/json'}
+    response = requests.post(token_url, params=parameters, headers=headers)
+    return response
 
 
 if __name__ == '__main__':
