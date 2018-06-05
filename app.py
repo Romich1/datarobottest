@@ -25,15 +25,14 @@ def request_authorization():
 
 @app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
-    responce_code = request.values.get('code')
-    token_responce = token_request(responce_code)
+    response_code = request.values.get('code')
+    token_response = token_request(response_code)
     try:
-        user_token = token_responce.json().get('access_token')
+        user_token = token_response.json().get('access_token')
     except ValueError:
         user_token = None
-
     if user_token is None:
-        return('Token recieving error <br /> Headers <br />  %s <br /> Responce text <br /> %s ' % (token_responce.headers,jsonify(token_responce.text)))
+        return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
     else:
         return users_repos(user_token)
 
@@ -45,11 +44,13 @@ def token_request(token_code):
     response = requests.post(token_url, params=parameters, headers=headers)
     return response
 
+
 def users_repos(token):
     url = 'https://api.github.com/user/repos'
-    headers = {'Accept': 'application/json','Authorization':'Bearer %s' %token}
+    headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
     response = requests.get(url, headers=headers)
     return jsonify(response.text)
+
 
 if __name__ == '__main__':
     app.run()
