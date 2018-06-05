@@ -31,7 +31,7 @@ def redirect_auth():
         user_token = token_responce.json('access_token')
     except:
         user_token = ''
-    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br />  %s ' % (token_responce.headers,len(user_token)))
+    return('Redirect auth triggered <br /> Headers <br />  %s <br /> Responce text <br /> l %s t %s ' % (token_responce.headers,len(user_token),token_responce.text))
 
 
 def token_request(token_code):
