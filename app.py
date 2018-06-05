@@ -48,7 +48,7 @@ def token_request(token_code):
 def users_repos(token):
     url = 'https://api.github.com/user/repos'
     headers = {'Accept': 'application/json','Authorization':'Bearer %s' %token}
-    response = requests.post(url, headers=headers)
+    response = requests.get(url, headers=headers)
     return jsonify(response.text)
 
 if __name__ == '__main__':
