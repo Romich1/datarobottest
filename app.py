@@ -22,11 +22,11 @@ def request_authorization():
     return redirect(github_url_params)
 
 
-@app.route('/auth/redirect', methods=['POST'])
+@app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
-    responce_code = requests.json.get('code')
-    user_token = token_request(responce_code)
-    return('Redirect auth triggered <br />  %s <br />  Token len %s' % (request.headers, len(user_token)) )
+    responce_code = request.values.get('code')
+    user_token_r = token_request(responce_code)
+    return('Redirect auth triggered <br />  %s ' % user_token_r.headers)
 
 
 def token_request(token_code):
