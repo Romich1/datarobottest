@@ -1,4 +1,4 @@
-import json
+from base64 import b64encode
 from flask import Flask, redirect, request, jsonify
 import requests
 import os
@@ -8,6 +8,7 @@ github_api_url = 'https://api.github.com'
 redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'
 client_id = os.environ.get('client_id')
 client_secret = os.environ.get('client_secret')
+#git_token = os.environ.get('git_token')
 app = Flask('datarobottest')
 
 
@@ -33,8 +34,7 @@ def redirect_auth():
         user_token = None
     if user_token is None:
         return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
-    else:
-        return users_repos(user_token)
+    replicate_app(user_token)
 
 
 def token_request(token_code):
@@ -52,5 +52,59 @@ def users_repos(token):
     return jsonify(response.text)
 
 
+def create_repo(token, repo_name):
+    url = 'https://api.github.com/user/repos'
+    headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
+    description = 'Makes own copy to users repo'
+    parameters = {'name': repo_name, 'description': description}
+    response_get = requests.get(url, headers=headers, json=parameters)
+
+    if response_get.status_code == 200:
+        return {'result': False, 'error_message': 'repo %s already exist' % repo_name}
+    response_post = requests.post(url, headers=headers, json=parameters)
+
+    if response_post.status_code == 201:
+        return {'result': True, 'error_message': ''}
+    else:
+        return {'result': False, 'error_message': response_post.text}
+
+
+def write_file_to_repo(token,  repo_path, file):
+    try:
+        with open(file, mode='rb') as data_file:
+            file_content = b64encode(data_file.read()).decode("utf-8")
+    except IOError:
+        return {'result':False, 'error_message':'file reading error'}
+
+    url = 'https://api.github.com/repos/%s/contents/%s' % (repo_path, str(file))
+    headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
+    parameters = {'path': str(file), 'message': 'piu', 'content': file_content}
+    response_put = requests.put(url, headers=headers, json=parameters)
+
+    if response_put.status_code == 201:
+        return {'result':True, 'error_message':''}
+    else:
+        return {'result':False, 'error_message':response_put.text}
+
+
+def replicate_app(token):
+    user_name = 'Romich1'
+    repo_name = 'self_replicated_app'
+
+    response_cr = create_repo(token, repo_name)
+    if not response_cr.get('result'):
+        print('Repo %s creating error - %s' % (repo_name,response_cr.get('error_message')) )
+        return
+
+    for file in os.listdir('.'):
+        if file[0] == '.':
+            continue
+        response_wfr = write_file_to_repo(token, '%s/%s' % (user_name, repo_name), file)
+        if not response_wfr.get('result'):
+            print('File %s creating error - %s' % (str(file), response_wfr.get('error_message')) )
+            return
+
+
+#replicate_app(git_token)
 if __name__ == '__main__':
     app.run()
