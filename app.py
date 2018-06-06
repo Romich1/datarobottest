@@ -90,19 +90,22 @@ def write_file_to_repo(token,  repo_path, file):
 def replicate_app(token):
     user_name = 'Romich1'
     repo_name = 'self_replicated_app'
-
+    result = {'result': True, 'error_message': ''}
     response_cr = create_repo(token, repo_name)
     if not response_cr.get('result'):
-        print('Repo %s creating error - %s' % (repo_name,response_cr.get('error_message')) )
-        return
+        result['result'] = False
+        result['error_message'] += '\n Repo %s creating error - %s' % (repo_name,response_cr.get('error_message'))
+        return result
 
     for file in os.listdir('.'):
         if file[0] == '.':
             continue
         response_wfr = write_file_to_repo(token, '%s/%s' % (user_name, repo_name), file)
         if not response_wfr.get('result'):
-            print('File %s creating error - %s' % (str(file), response_wfr.get('error_message')) )
-            return
+            result['result'] = False
+            result['error_message'] += '\n File %s creating error - %s' % (str(file), response_wfr.get('error_message'))
+
+    return result
 
 
 #replicate_app(git_token)
