@@ -8,7 +8,7 @@ github_api_url = 'https://api.github.com'
 redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'
 client_id = os.environ.get('client_id')
 client_secret = os.environ.get('client_secret')
-#git_token = os.environ.get('git_token') #for local debug
+git_token = os.environ.get('git_token') #for local debug
 app = Flask('datarobottest')
 
 
