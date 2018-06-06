@@ -30,6 +30,8 @@ def redirect_auth():
     #return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
     response_code = request.values.get('code')
     token_response = token_request(response_code)
+    return('Token response <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
+
     try:
         user_token = token_response.json().get('access_token')
     except ValueError:
@@ -47,19 +49,13 @@ def token_request(token_code):
     return response
 
 
-def users_repos(token):
-    url = 'https://api.github.com/user/repos'
-    headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
-    response = requests.get(url, headers=headers)
-    return jsonify(response.text)
-
-
 def create_repo(token, user_name, repo_name):
     url = 'https://api.github.com/user/repos'
     url_get = 'https://api.github.com/repos/%s/%s' % (user_name,repo_name)
     headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
     description = 'Makes own copy to users repo'
     parameters = {'name': repo_name, 'description': description}
+
     response_get = requests.get(url_get, headers=headers, json=parameters)
     if response_get.status_code == 200:
         return {'result': False, 'error_message': 'repo %s already exist' % repo_name}
