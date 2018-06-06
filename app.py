@@ -30,8 +30,6 @@ def redirect_auth():
     #return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
     response_code = request.values.get('code')
     token_response = token_request(response_code)
-    return('Token response <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
-
     try:
         user_token = token_response.json().get('access_token')
     except ValueError:
@@ -85,10 +83,27 @@ def write_file_to_repo(token,  user_name, repo_name, file):
         return {'result':False, 'error_message':response_put.text}
 
 
+def user_info(token):
+    url = 'https://api.github.com/user'
+    headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
+    response_get = requests.get(url, headers=headers)
+    if response_get.status_code != 200:
+        return {'result': False, 'error_message': response_get.text}
+    else:
+        return {'result': True, 'error_message': '', "user_info":response_get.json()}
+
+
 def replicate_app(token):
-    user_name = 'Romich1'
-    repo_name = 'self_replicated_app'
     result = {'result': True, 'error_message': ''}
+
+    response_ui = user_info(token)
+    if not response_ui.get('result'):
+        result['result'] = False
+        result['error_message'] += '\n Getting user info error- %s' % response_ui.get('error_message')
+        return result
+    user_name = response_ui.get('user_info').get('login')
+
+    repo_name = 'self_replicated_app'
     response_cr = create_repo(token, user_name, repo_name)
     if not response_cr.get('result'):
         result['result'] = False
@@ -104,7 +119,6 @@ def replicate_app(token):
             result['error_message'] += '\n File %s creating error - %s' % (str(file), response_wfr.get('error_message'))
 
     return result
-
 
 if __name__ == '__main__':
     app.run()
