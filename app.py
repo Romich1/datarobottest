@@ -96,13 +96,13 @@ def user_info(token):
 def replicate_app(token):
     result = {'result': True, 'error_message': ''}
 
-    response_ui = user_info(token)
-    if not response_ui.get('result'):
-        result['result'] = False
-        result['error_message'] += '\n Getting user info error- %s' % response_ui.get('error_message')
-        return result
-    user_name = response_ui.get('user_info').get('login')
-
+#    response_ui = user_info(token)
+#    if not response_ui.get('result'):
+#        result['result'] = False
+#        result['error_message'] += '\n Getting user info error- %s' % response_ui.get('error_message')
+#        return result
+#    user_name = response_ui.get('user_info').get('login')
+    user_name = 'Romich1'
     repo_name = 'self_replicated_app'
     response_cr = create_repo(token, user_name, repo_name)
     if not response_cr.get('result'):
