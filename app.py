@@ -6,6 +6,7 @@ import os
 github_auth_url = 'https://github.com/login/oauth/authorize'
 github_api_url = 'https://api.github.com'
 redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'
+scope = 'public_repo'
 client_id = os.environ.get('client_id')
 client_secret = os.environ.get('client_secret')
 #git_token = os.environ.get('git_token') #for local debug
@@ -20,7 +21,7 @@ def index():
 
 @app.route('/auth')
 def request_authorization():
-    github_url_params = '%s?client_id=%s&redirect_uri=%s' % (github_auth_url, client_id, redirect_url)
+    github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_url, scope)
     return redirect(github_url_params)
 
 
