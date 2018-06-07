@@ -60,8 +60,9 @@ def create_repo(token, user_name, repo_name):
     response_get = requests.get(url_get, headers=headers, json=parameters)
     if response_get.status_code == 200:
         return {'result': False, 'error_message': 'repo %s already exist' % repo_name}
-    response_post = requests.post(url, headers=headers, json=parameters)
     print(url)
+    print(token)
+    response_post = requests.post(url, headers=headers, json=parameters)
     print(response_post.headers)
     print(response_post.text)
     if response_post.status_code == 201:
