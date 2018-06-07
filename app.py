@@ -26,8 +26,8 @@ def request_authorization():
 
 @app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
-    #response_r = replicate_app(git_token) #for local debug
-    #return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
+    response_r = replicate_app(git_token) #for local debug
+    return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
     response_code = request.values.get('code')
     token_response = token_request(response_code)
     try:
@@ -52,7 +52,7 @@ def token_request(token_code):
 
 def create_repo(token, user_name, repo_name):
     url = 'https://api.github.com/user/repos'
-    url_get = 'https://api.github.com/repos/%s/%s' % (user_name,repo_name)
+    url_get = 'https://api.github.com/repos/%s/%s' % (user_name, repo_name)
     headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
     description = 'Makes own copy to users repo'
     parameters = {'name': repo_name, 'description': description}
@@ -61,7 +61,9 @@ def create_repo(token, user_name, repo_name):
     if response_get.status_code == 200:
         return {'result': False, 'error_message': 'repo %s already exist' % repo_name}
     response_post = requests.post(url, headers=headers, json=parameters)
-
+    print(url)
+    print(response_post.headers)
+    print(response_post.text)
     if response_post.status_code == 201:
         return {'result': True, 'error_message': ''}
     else:
