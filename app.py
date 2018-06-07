@@ -26,16 +26,16 @@ def index():
 
 @app.route('/auth')
 def request_authorization():
+    if local_debug:
+        response_r = replicate_app(git_token)
+        return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message'))
+
     github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_url, scope)
     return redirect(github_url_params)
 
 
 @app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
-    if local_debug:
-        response_r = replicate_app(git_token)
-        return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
-
     response_code = request.values.get('code')
     token_response = token_request(response_code)
     try:
@@ -119,9 +119,8 @@ def replicate_app(token):
         result['error_message'] += '\n Repo %s creating error - %s' % (repo_name, response_cr.get('error_message'))
         return result
 
-    wd = os.getcwd()
     for file in app_files:
-        response_wfr = write_file_to_repo(token, user_name, repo_name, '%s/%s' % (wd, file))
+        response_wfr = write_file_to_repo(token, user_name, repo_name, file)
         if not response_wfr.get('result'):
             result['result'] = False
             result['error_message'] += '\n File %s creating error - %s' % (str(file), response_wfr.get('error_message'))
