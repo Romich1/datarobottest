@@ -8,7 +8,7 @@ github_api_url = 'https://api.github.com'
 redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'
 client_id = os.environ.get('client_id')
 client_secret = os.environ.get('client_secret')
-git_token = os.environ.get('git_token') #for local debug
+#git_token = os.environ.get('git_token') #for local debug
 app = Flask('datarobottest')
 
 
@@ -26,8 +26,8 @@ def request_authorization():
 
 @app.route('/auth/redirect', methods=['GET', 'POST'])
 def redirect_auth():
-    response_r = replicate_app(git_token) #for local debug
-    return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
+    #response_r = replicate_app(git_token) #for local debug
+    #return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message')) #for local debug
     response_code = request.values.get('code')
     token_response = token_request(response_code)
     try:
