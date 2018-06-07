@@ -36,7 +36,10 @@ def redirect_auth():
         user_token = None
     if user_token is None:
         return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
-    return replicate_app(user_token)
+
+    response_ra = replicate_app(user_token)
+    return 'Success: %s <br /> error message: %s' % (response_ra.get('result'), response_ra.get('error_message'))
+
 
 
 def token_request(token_code):
@@ -96,13 +99,13 @@ def user_info(token):
 def replicate_app(token):
     result = {'result': True, 'error_message': ''}
 
-#    response_ui = user_info(token)
-#    if not response_ui.get('result'):
-#        result['result'] = False
-#        result['error_message'] += '\n Getting user info error- %s' % response_ui.get('error_message')
-#        return result
-#    user_name = response_ui.get('user_info').get('login')
-    user_name = 'Romich1'
+    response_ui = user_info(token)
+    if not response_ui.get('result'):
+        result['result'] = False
+        result['error_message'] += '\n Getting user info error- %s' % response_ui.get('error_message')
+        return result
+    user_name = response_ui.get('user_info').get('login')
+
     repo_name = 'self_replicated_app'
     response_cr = create_repo(token, user_name, repo_name)
     if not response_cr.get('result'):
