@@ -35,7 +35,7 @@ app = Flask('datarobottest')
 @app.route('/index')
 def index():
     """Main page"""
-    replicate_link = '<a href="/auth">Replicate app to your GitHub</a>'
+    replicate_link = '<a href="/replicate">Replicate app to your GitHub</a>'
     return('Self replicated app description <br/> <br/> %s <br/>(Needs your GitHub credential)' % replicate_link)
 
 
