@@ -51,7 +51,7 @@ def request_authorization():
         response_r = replicate_app(git_token)
         return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message'))
 
-    redirect_uri = request.url_root.join('replicate/redirect')
+    redirect_uri = '%sreplicate/redirect' % request.url_root
     github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_uri, scope)
     print(github_url_params)
     return redirect(github_url_params)
