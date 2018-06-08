@@ -53,6 +53,7 @@ def request_authorization():
 
     redirect_uri = request.url_root.join('replicate/redirect')
     github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_uri, scope)
+    print(github_url_params)
     return redirect(github_url_params)
 
 
