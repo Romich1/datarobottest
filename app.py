@@ -20,7 +20,7 @@ import os
 local_debug = False  # local debugging with existed token (expected in 'git_token' env variable)
 github_auth_url = 'https://github.com/login/oauth/authorize'
 github_api_url = 'https://api.github.com'
-redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'  # should be the same as 'redirect Irl' in gitHub for this app
+redirect_url = 'https://datarobottest.herokuapp.com/replicate/redirect'  # should be the same as 'redirect Irl' in gitHub for this app
 scope = 'public_repo'
 client_id = os.environ.get('client_id')  # provided by gitHub for this app
 client_secret = os.environ.get('client_secret')  # provided by gitHub for this app
