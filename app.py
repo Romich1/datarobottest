@@ -1,42 +1,47 @@
 """
 Application that replicate itself to user`s github
+
 Usage scenario:
+
 1) User goes by link 'Replicate app to my GitHub'
 2) User redirects to GitHub authentication page and input own GitHub credential
 3) After successful authentication user received status of replication (hopes successfully)
 
-Technically uses next realization:
-1) Provide link for user to replicate app
-2) Make authorization according to gitHub Oauth logic
+Technical realization:
+
+1) Provides link for user to replicate app
+2) Makes request to authorization according to GitHub Oauth flow
 https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
-3) With received users token - create new repo and write applications files into it
+3) With received users token - creates new repo and writes applications files into it
+
 """
 
 from base64 import b64encode
-from flask import Flask, redirect, request, jsonify
+from flask import Flask, jsonify, redirect, render_template, request
 import requests
 import os
 
-local_debug = False  # local debugging with existed token (expected in 'git_token' env variable)
 github_auth_url = 'https://github.com/login/oauth/authorize'
 github_api_url = 'https://api.github.com'
-redirect_url = 'https://datarobottest.herokuapp.com/replicate/redirect'  # should be the same as 'redirect Irl' in gitHub for this app
-scope = 'public_repo'
 client_id = os.environ.get('client_id')  # provided by gitHub for this app
 client_secret = os.environ.get('client_secret')  # provided by gitHub for this app
+scope = 'public_repo'
+app_files = ('app.py', 'README.md', 'requirements.txt')  # app`s files that will be replicated!
+heroku_files = ('Procfile', 'Procfile.windows', 'runtime.txt')  # files for deployment to Heroku
+
+local_debug = False  # local debugging with existed token (expected in 'git_token' env variable)
 if local_debug:  # local debugging with existed token
     git_token = os.environ.get('git_token')
-app_files = ('app.py', 'README.md', 'requirements.txt')  # app`s files that will be replicated!
-heroku_files = ('Procfile', 'Procfile.Windows', 'runtime.txt')  # files for deployment to Heroku
-app = Flask('datarobottest')
+
+app = Flask('datarobottest', template_folder='')
 
 
 @app.route('/')
 @app.route('/index')
 def index():
     """Main page"""
-    replicate_link = '<a href="/replicate">Replicate app to your GitHub</a>'
-    return('Self replicated app description <br/> <br/> %s <br/>(Needs your GitHub credential)' % replicate_link)
+    page_template = render_template('index_template.html', description='Self replicated app')
+    return page_template
 
 
 @app.route('/replicate')
@@ -46,7 +51,8 @@ def request_authorization():
         response_r = replicate_app(git_token)
         return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message'))
 
-    github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_url, scope)
+    redirect_uri = request.url_root.join('replicate/redirect')
+    github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_uri, scope)
     return redirect(github_url_params)
 
 
