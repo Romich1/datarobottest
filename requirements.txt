@@ -1,4 +1,3 @@
 gunicorn
 flask
-oauth2
 requests

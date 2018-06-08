@@ -27,7 +27,7 @@ github_api_url = 'https://api.github.com'
 client_id = os.environ.get('client_id')  # provided by gitHub for this app
 client_secret = os.environ.get('client_secret')  # provided by gitHub for this app
 scope = 'public_repo'
-repo_name = 'self_replicated_app'
+gloal_repo_name = 'self_replicated_app'
 app_files = ('app.py', 'README.md', 'requirements.txt')  # app`s files that will be replicated!
 heroku_files = ('Procfile', 'runtime.txt')  # files for deployment to Heroku
 
@@ -42,8 +42,8 @@ app = Flask('datarobottest', template_folder='')
 @app.route('/index')
 def index(result='', error_massage=''):
     """Main page"""
-    global repo_name
-    page_template = render_template('index_template.html', description='Self replicated app', repo_name_value=repo_name,
+    global gloal_repo_name
+    page_template = render_template('index_template.html', description='Self replicated app', repo_name_value=gloal_repo_name ,
                                     result=result, error_massage=error_massage)
     return page_template
 
@@ -51,8 +51,8 @@ def index(result='', error_massage=''):
 @app.route('/replicate')
 def request_authorization():
     """Initiates app replication"""
-    global repo_name
-    repo_name = request.values.get('repo_name')
+    global gloal_repo_name
+    gloal_repo_name = request.values.get('repo_name')
 
     if local_debug:
         response_r = replicate_app(git_token)
@@ -74,7 +74,6 @@ def redirect_auth():
         user_token = None
     if user_token is None:
         return index(result='False', error_massage=jsonify(token_response.text))
-        #return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
 
     response_ra = replicate_app(user_token)
     return index(result=response_ra.get('result'), error_massage=response_ra.get('error_message'))
@@ -148,7 +147,7 @@ def replicate_app(token):
     Return result dict with structure ('result','error_message')
     Error messages accumulates if were several errors
     """
-    global repo_name
+    global gloal_repo_name
     result = {'result': True, 'error_message': ''}
 
     response_ui = user_info(token)
@@ -158,14 +157,14 @@ def replicate_app(token):
         return result
     user_name = response_ui.get('user_info').get('login')
 
-    response_cr = create_repo(token, user_name, repo_name)
+    response_cr = create_repo(token, user_name, gloal_repo_name )
     if not response_cr.get('result'):
         result['result'] = False
-        result['error_message'] += '\n Repo %s creating error - %s' % (repo_name, response_cr.get('error_message'))
+        result['error_message'] += '\n Repo %s creating error - %s' % (gloal_repo_name , response_cr.get('error_message'))
         return result
 
     for file in (app_files + heroku_files):
-        response_wfr = write_file_to_repo(token, user_name, repo_name, file)
+        response_wfr = write_file_to_repo(token, user_name, gloal_repo_name , file)
         if not response_wfr.get('result'):
             result['result'] = False
             result['error_message'] += '\n File %s creating error - %s' % (str(file), response_wfr.get('error_message'))

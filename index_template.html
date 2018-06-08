@@ -5,17 +5,35 @@
     <title>Self replicated app</title>
 </head>
 <body>
-    <br/>{{ description }}
+<br/><h1>{{ description }}</h1>
+     <br/> Repo name <input type="text" id="repo_name" value= {{repo_name_value}} >
     <br/>
-    <br/> Reponame <input type="text" id="repo_name" value= {{repo_name_value}} >
-    <br/> <button onclick="replicate()">Replicate app to your GitHub</button>
-    <br/> (Requests your GitHub credential)
-    <br/>
+    <br/> <button onclick="replicate()">Replicate app to my GitHub</button>
     <br/>
     <br/> -------------------
     <br/> Result
     <br/> Success: {{ result }}
     <br/> Error_message:  {{ error_massage }}
+    <br/>
+    <br/>
+    <br/>DESCRIPTION
+    <br/>
+    <br/>Makes copy of own code to User`s Github account
+    <br/>
+    <br/>
+    <br/>USAGE SCENARIO
+    <br/>
+    <br/>1) User goes by link 'Replicate app to my GitHub'
+    <br/>2) User redirects to GitHub authentication page and input own GitHub credential
+    <br/>3) After successful authentication user received status of replication (hopes successfully)
+    <br/>
+    <br/>
+    <br/>TECHNICAL REALIZATION
+    <br/>
+    <br/>1) Provides web page with link that initiate app replication
+    <br/>2) Makes request to authorization according to GitHub Oauth flow
+    <br/>https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
+    <br/>3) With received users token - creates new repo and writes applications files into it
 
 
 <script>
