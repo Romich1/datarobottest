@@ -1,31 +1,47 @@
+"""
+Application that replicate itself to user`s github
+Usage scenario:
+1) User goes by link 'Replicate app to my GitHub'
+2) User redirects to GitHub authentication page and input own GitHub credential
+3) After successful authentication user received status of replication (hopes successfully)
+
+Technically uses next realization:
+1) Provide link for user to replicate app
+2) Make authorization according to gitHub Oauth logic
+https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
+3) With received users token - create new repo and write applications files into it
+"""
+
 from base64 import b64encode
 from flask import Flask, redirect, request, jsonify
 import requests
 import os
 
-local_debug = False
+local_debug = False  # local debugging with existed token (expected in 'git_token' env variable)
 github_auth_url = 'https://github.com/login/oauth/authorize'
 github_api_url = 'https://api.github.com'
-redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'
+redirect_url = 'http://datarobottest.herokuapp.com/auth/redirect'  # should be the same as 'redirect Irl' in gitHub for this app
 scope = 'public_repo'
-client_id = os.environ.get('client_id')
-client_secret = os.environ.get('client_secret')
-if local_debug:
+client_id = os.environ.get('client_id')  # provided by gitHub for this app
+client_secret = os.environ.get('client_secret')  # provided by gitHub for this app
+if local_debug:  # local debugging with existed token
     git_token = os.environ.get('git_token')
-app_files = ('app.py', 'README.md', 'requirements.txt')
-heroku_files = ('Procfile', 'Procfile.Windows', 'runtime.txt')
+app_files = ('app.py', 'README.md', 'requirements.txt')  # app`s files that will be replicated!
+heroku_files = ('Procfile', 'Procfile.Windows', 'runtime.txt')  # files for deployment to Heroku
 app = Flask('datarobottest')
 
 
 @app.route('/')
 @app.route('/index')
 def index():
+    """Main page"""
     replicate_link = '<a href="/auth">Replicate app to your GitHub</a>'
     return('Self replicated app description <br/> <br/> %s <br/>(Needs your GitHub credential)' % replicate_link)
 
 
-@app.route('/auth')
+@app.route('/replicate')
 def request_authorization():
+    """Initiates app replication"""
     if local_debug:
         response_r = replicate_app(git_token)
         return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message'))
@@ -34,8 +50,9 @@ def request_authorization():
     return redirect(github_url_params)
 
 
-@app.route('/auth/redirect', methods=['GET', 'POST'])
+@app.route('/replicate/redirect')
 def redirect_auth():
+    """Handles income callback from GitHub after authentication"""
     response_code = request.values.get('code')
     token_response = token_request(response_code)
     try:
@@ -50,6 +67,7 @@ def redirect_auth():
 
 
 def token_request(token_code):
+    """Requests users token with received 'code' parameter"""
     token_url = 'https://github.com/login/oauth/access_token'
     parameters = {'client_id': client_id, 'client_secret': client_secret, 'code': token_code}
     headers = {'Accept': 'application/json'}
@@ -58,6 +76,9 @@ def token_request(token_code):
 
 
 def create_repo(token, user_name, repo_name):
+    """Creates new repo in user`s account
+    Checks if repo name exist and returns error if exist
+    """
     url = 'https://api.github.com/user/repos'
     url_get = 'https://api.github.com/repos/%s/%s' % (user_name, repo_name)
     headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
@@ -75,6 +96,10 @@ def create_repo(token, user_name, repo_name):
 
 
 def write_file_to_repo(token,  user_name, repo_name, file):
+    """Writes app files to user`s repo
+    Files list to write receives in app_files variable
+    Does not check if file exist! Always writes to new repo. Should be fixed with re-write logic (not developed yet)
+    """
     try:
         with open(file, mode='rb') as data_file:
             file_content = b64encode(data_file.read()).decode("utf-8")
@@ -93,6 +118,7 @@ def write_file_to_repo(token,  user_name, repo_name, file):
 
 
 def user_info(token):
+    """Receives user info by token. Uses for getting user name"""
     url = 'https://api.github.com/user'
     headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
     response_get = requests.get(url, headers=headers)
@@ -103,6 +129,11 @@ def user_info(token):
 
 
 def replicate_app(token):
+    """Main function
+    Creates new repo and writes files into it
+    Return result dict with structure ('result','error_message')
+    Error messages accumulates if were several errors
+    """
     result = {'result': True, 'error_message': ''}
 
     response_ui = user_info(token)
@@ -119,7 +150,7 @@ def replicate_app(token):
         result['error_message'] += '\n Repo %s creating error - %s' % (repo_name, response_cr.get('error_message'))
         return result
 
-    for file in app_files:
+    for file in (app_files + heroku_files):
         response_wfr = write_file_to_repo(token, user_name, repo_name, file)
         if not response_wfr.get('result'):
             result['result'] = False
