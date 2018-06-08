@@ -6,8 +6,23 @@
 </head>
 <body>
     <br/>{{ description }}
-    <br />
-    <br /> <a href="/replicate">Replicate app to your GitHub</a>
-    <br />(Will request your authorization with GitHub credential)
+    <br/>
+    <br/> Reponame <input type="text" id="repo_name" value= {{repo_name_value}} >
+    <br/> <button onclick="replicate()">Replicate app to your GitHub</button>
+    <br/> (Requests your GitHub credential)
+    <br/>
+    <br/>
+    <br/> -------------------
+    <br/> Result
+    <br/> Success: {{ result }}
+    <br/> Error_message:  {{ error_massage }}
+
+
+<script>
+function replicate() {
+  window.location.href = "/replicate?repo_name="+document.getElementById("repo_name").value;
+}
+</script>
+
 </body>
 </html>

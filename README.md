@@ -24,7 +24,7 @@ For run app on your server:
 1) Define address where app will be hosted ( _yourappdomain.com_ for example)
 2) Register app in your GitHub account 
 3) Receive `client_id` and `client_secret` from gitHub for this app
-4) Set `redirect_uri` in application setting on GitHub in format _yourappdomain.com**/replicate/redirect**_ 
+4) Set `redirect_uri` in application setting on GitHub in format _yourappdomain.com/replicate/redirect_ 
     (just add  _**/replicate/redirect**_ to your hosting address)      
 5) Set `client_id` and `client_secret` environment variables received on step 3 
     (way how to set environment variables depends on your hosting solution) 

@@ -18,6 +18,7 @@ https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
 
 from base64 import b64encode
 from flask import Flask, jsonify, redirect, render_template, request
+
 import requests
 import os
 
@@ -26,8 +27,9 @@ github_api_url = 'https://api.github.com'
 client_id = os.environ.get('client_id')  # provided by gitHub for this app
 client_secret = os.environ.get('client_secret')  # provided by gitHub for this app
 scope = 'public_repo'
+repo_name = 'self_replicated_app'
 app_files = ('app.py', 'README.md', 'requirements.txt')  # app`s files that will be replicated!
-heroku_files = ('Procfile', 'Procfile.windows', 'runtime.txt')  # files for deployment to Heroku
+heroku_files = ('Procfile', 'runtime.txt')  # files for deployment to Heroku
 
 local_debug = False  # local debugging with existed token (expected in 'git_token' env variable)
 if local_debug:  # local debugging with existed token
@@ -38,22 +40,26 @@ app = Flask('datarobottest', template_folder='')
 
 @app.route('/')
 @app.route('/index')
-def index():
+def index(result='', error_massage=''):
     """Main page"""
-    page_template = render_template('index_template.html', description='Self replicated app')
+    global repo_name
+    page_template = render_template('index_template.html', description='Self replicated app', repo_name_value=repo_name,
+                                    result=result, error_massage=error_massage)
     return page_template
 
 
 @app.route('/replicate')
 def request_authorization():
     """Initiates app replication"""
+    global repo_name
+    repo_name = request.values.get('repo_name')
+
     if local_debug:
         response_r = replicate_app(git_token)
-        return 'Success: %s <br /> error message: %s' % (response_r.get('result'), response_r.get('error_message'))
+        return index(result=response_r.get('result'), error_massage=response_r.get('error_message'))
 
     redirect_uri = '%sreplicate/redirect' % request.url_root
     github_url_params = '%s?client_id=%s&redirect_uri=%s&scope=%s' % (github_auth_url, client_id, redirect_uri, scope)
-    print(github_url_params)
     return redirect(github_url_params)
 
 
@@ -67,10 +73,11 @@ def redirect_auth():
     except ValueError:
         user_token = None
     if user_token is None:
-        return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
+        return index(result='False', error_massage=jsonify(token_response.text))
+        #return('Token recieving error <br /> Response headers <br />  %s <br /> Response text <br /> %s ' % (token_response.headers,jsonify(token_response.text)))
 
     response_ra = replicate_app(user_token)
-    return 'Success: %s <br /> error message: %s' % (response_ra.get('result'), response_ra.get('error_message'))
+    return index(result=response_ra.get('result'), error_massage=response_ra.get('error_message'))
 
 
 def token_request(token_code):
@@ -111,7 +118,7 @@ def write_file_to_repo(token,  user_name, repo_name, file):
         with open(file, mode='rb') as data_file:
             file_content = b64encode(data_file.read()).decode("utf-8")
     except IOError:
-        return {'result':False, 'error_message':'file reading error'}
+        return {'result': False, 'error_message': 'file reading error'}
 
     url = 'https://api.github.com/repos/%s/%s/contents/%s' % (user_name, repo_name, str(file))
     headers = {'Accept': 'application/json', 'Authorization': 'Bearer %s' % token}
@@ -119,9 +126,9 @@ def write_file_to_repo(token,  user_name, repo_name, file):
     response_put = requests.put(url, headers=headers, json=parameters)
 
     if response_put.status_code == 201:
-        return {'result':True, 'error_message':''}
+        return {'result': True, 'error_message': ''}
     else:
-        return {'result':False, 'error_message':response_put.text}
+        return {'result': False, 'error_message': response_put.text}
 
 
 def user_info(token):
@@ -132,7 +139,7 @@ def user_info(token):
     if response_get.status_code != 200:
         return {'result': False, 'error_message': response_get.text}
     else:
-        return {'result': True, 'error_message': '', "user_info":response_get.json()}
+        return {'result': True, 'error_message': '', "user_info": response_get.json()}
 
 
 def replicate_app(token):
@@ -141,6 +148,7 @@ def replicate_app(token):
     Return result dict with structure ('result','error_message')
     Error messages accumulates if were several errors
     """
+    global repo_name
     result = {'result': True, 'error_message': ''}
 
     response_ui = user_info(token)
@@ -150,7 +158,6 @@ def replicate_app(token):
         return result
     user_name = response_ui.get('user_info').get('login')
 
-    repo_name = 'self_replicated_app'
     response_cr = create_repo(token, user_name, repo_name)
     if not response_cr.get('result'):
         result['result'] = False
